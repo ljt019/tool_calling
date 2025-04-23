@@ -8,5 +8,9 @@ license-file = "license.md"
 repository = "https://github.com/ljt019/tool_calling/"
 
 [dependencies]
+inventory = "0.3.20"
+proc-macro2 = "1.0.95"
+quote = "1.0.40"
+syn = "2.0.100"
 
 [dev-dependencies]
