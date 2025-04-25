@@ -1,13 +1,19 @@
 use linkme::distributed_slice;
-use serde_json::Value;
+use serde::Serialize;
+use serde_json::{json, Value};
 /// Re-export the proc-macro attribute
 pub use tool_calling_derive::tool;
 
+// Optional Ollama integration
+pub mod ollama;
+
 /// Metadata about a "tool" function
+#[derive(Serialize, Debug)]
 pub struct Tool {
     pub name: String,
     pub description: String,
-    pub parameters: Vec<String>,
+    pub parameter_schema: Value,
+    #[serde(skip)] // Don't serialize the function pointer
     pub function: fn(&[String]) -> Result<String, String>,
 }
 
@@ -42,6 +48,26 @@ impl ToolHandler {
         (tool.function)(args)
     }
 
+    /// Produce a JSON schema for the LLM describing all available tools
+    pub fn all_tools_schema(&self) -> Value {
+        let funcs: Vec<_> = self
+            .tools
+            .iter()
+            .map(|tool| {
+                json!({
+                    "type": "function",
+                    "function": {
+                        "name": tool.name,
+                        "description": tool.description,
+                        "parameters": tool.parameter_schema
+                    }
+                })
+            })
+            .collect();
+
+        Value::Array(funcs)
+    }
+
     pub fn call_tool(&self, input: &Value) -> Result<String, String> {
         let obj = input.as_object().ok_or("Expected JSON object")?;
         let input_type = obj
@@ -67,14 +93,35 @@ impl ToolHandler {
             .or_else(|| obj.get("arguments"))
             .and_then(|a| a.as_object())
             .ok_or("Missing or invalid 'arguments' field")?;
-        let params_schema = function
-            .get("parameters")
-            .and_then(|p| p.as_object())
-            .ok_or("Missing or invalid 'function.parameters' field")?;
-        let required = params_schema
-            .get("required")
-            .and_then(|r| r.as_array())
-            .ok_or("Missing or invalid 'function.parameters.required' field")?;
+
+        // Try to get parameters from the function call
+        let params_schema = function.get("parameters").and_then(|p| p.as_object());
+
+        // If parameters are not provided but the tool exists in our registry, use its schema
+        let (params_schema, required) = if let Some(schema) = params_schema {
+            // Use provided schema
+            let required = schema
+                .get("required")
+                .and_then(|r| r.as_array())
+                .ok_or("Missing or invalid 'function.parameters.required' field")?;
+            (schema, required)
+        } else if let Some(tool) = self.get_tool(name) {
+            // Use schema from registered tool
+            let tool_schema = tool
+                .parameter_schema
+                .as_object()
+                .ok_or("Invalid parameter schema in registered tool")?;
+            let required = tool_schema
+                .get("required")
+                .and_then(|r| r.as_array())
+                .ok_or("Missing or invalid 'required' field in tool parameter schema")?;
+            (tool_schema, required)
+        } else {
+            return Err(format!(
+                "Missing parameters schema and tool '{}' not found in registry",
+                name
+            ));
+        };
 
         let mut args: Vec<String> = Vec::new();
         for param in required {
