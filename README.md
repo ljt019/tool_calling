@@ -3,6 +3,9 @@
 <!-- CI / Workflow Badges -->
 [<img alt="crates.io" src="https://img.shields.io/crates/v/tool_calling.svg?style=for-the-badge&color=fc8d62&logo=rust" height="19">](https://crates.io/crates/tool_calling)
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-tool_calling-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="19">](https://docs.rs/tool_calling)
+![Build](https://github.com/ljt019/tool_calling/actions/workflows/build_and_release.yaml/badge.svg?branch=main)
+![Tests](https://github.com/ljt019/tool_calling/actions/workflows/tests.yaml/badge.svg?branch=main)
+![Doc Tests](https://github.com/ljt019/tool_calling/actions/workflows/doc_tests.yaml/badge.svg?branch=main)
 
 A procedural-macro framework for defining, registering, and invoking Rust functions as tools with automatic JSON Schema validation and error handling.
 
