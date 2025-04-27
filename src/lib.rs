@@ -6,24 +6,25 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
-/// Attribute to specify a default value for `Option<T>` parameters in tools.
+/// Attribute to specify handling of `Option<T>` parameters in tools.
 ///
-/// Use `#[default = <literal>]` on `Option<T>` parameters to set a default if the argument is omitted.
+/// You can manually unwrap `Option<T>` parameters using `unwrap_or` or `unwrap_or_else`.
 ///
 /// # Examples
 ///
 /// ```rust
-/// use tool_calling::{tool, default};
+/// use tool_calling::tool;
 ///
 /// #[tool]
 /// fn greet(
 ///     name: String,
-///     #[default = "?"] punctuation: Option<String>,
+///     punctuation: Option<String>,
 /// ) -> String {
-///     let p = punctuation.unwrap_or_else(|| "!".into());
+///     let p = punctuation.unwrap_or_else(|| "!".to_string());
 ///     format!("Hello, {}{}", name, p)
 /// }
 /// ```
+/// (Defaults must be handled manually via `Option::unwrap_or`/`unwrap_or_else`.)
 pub use tool_calling_derive::default;
 /// Attribute macro to mark a function as a tool.
 ///
@@ -35,8 +36,8 @@ pub use tool_calling_derive::default;
 /// use tool_calling::tool;
 ///
 /// #[tool]
-/// fn add(a: i32, b: i32) -> i32 {
-///     a + b
+/// fn add(a: i32, b: i32) -> String {
+///     (a + b).to_string()
 /// }
 /// ```
 pub use tool_calling_derive::tool;
@@ -144,7 +145,12 @@ static ALL_TOOLS: Lazy<Vec<Tool>> =
 /// # Examples
 ///
 /// ```rust
-/// use tool_calling::tools;
+/// use tool_calling::{tool, tools};
+///
+/// #[tool]
+/// fn example_tool() -> String {
+///     "ok".to_string()
+/// }
 ///
 /// let all = tools();
 /// assert!(all.iter().any(|t| t.name == "example_tool"));
@@ -233,8 +239,13 @@ impl ToolHandler {
     /// # Examples
     ///
     /// ```rust
-    /// use tool_calling::{ToolHandler, ToolError};
+    /// use tool_calling::{tool, ToolHandler, ToolError};
     /// use serde_json::json;
+    ///
+    /// #[tool]
+    /// fn add(a: i32, b: i32) -> String {
+    ///     (a + b).to_string()
+    /// }
     ///
     /// #[tokio::main]
     /// async fn main() {
@@ -243,7 +254,7 @@ impl ToolHandler {
     ///         "type": "function",
     ///         "function": {
     ///             "name": "add",
-    ///             "arguments": { "a": 1, "b": 2 }
+    ///         "arguments": { "a": 1, "b": 2 }
     ///         }
     ///     });
     ///     let res = handler.call_tool(&payload).await.unwrap();
