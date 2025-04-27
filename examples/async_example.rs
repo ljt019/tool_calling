@@ -13,19 +13,19 @@ It will automatically generate a tool schema using:
 - The function docstring as the tool description
 - The function parameters as the tool parameters (use Option<T> for optional parameters)
 
+- In this an async context, like this example,
+you must call the tool using the async versions of the tool caller methods
+
 */
 
 #[tool]
-/// Get user info from database
-fn get_user_info(user_id: u32) -> String {
-    match user_id {
-        1 => "User 1 info: Name: John Doe, Email: john.doe@example.com".to_string(),
-        2 => "User 2 info: Name: Jane Smith, Email: jane.smith@example.com".to_string(),
-        _ => "User not found".to_string(),
-    }
+/// Read a file
+async fn read_file(path: String) -> String {
+    // In a real implementation, you would read the file, here we will simulate an async operation
+    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    format!("File content: {}", path)
 }
 
-// Make main async
 #[tokio::main]
 async fn main() {
     // Use ToolHandler::default()
@@ -33,7 +33,7 @@ async fn main() {
 
     // You can get a tools schema by name
     println!("\n=== Single Tool Information ===");
-    if let Some(tool) = tool_handler.get_tool("get_user_info") {
+    if let Some(tool) = tool_handler.get_tool("read_file") {
         println!("Name: {}", tool.name);
         println!("Description: {}", tool.description);
         println!(
@@ -45,16 +45,16 @@ async fn main() {
     /*
     Println output:
     === Single Tool Information ===
-    Name: get_user_info
-    Description: Get user info from database
+    Name: read_file
+    Description: Read a file
     Parameters: {
       "properties": {
-        "user_id": {
-          "type": "integer"
+        "path": {
+          "type": "string"
         }
       },
       "required": [
-        "user_id"
+        "path"
       ],
       "type": "object"
     }
@@ -73,16 +73,16 @@ async fn main() {
     [
       {
         "function": {
-          "description": "Get user info from database",
-          "name": "get_user_info",
+          "description": "Read a file",
+          "name": "read_file",
           "parameters": {
             "properties": {
-              "user_id": {
-                "type": "integer"
+              "path": {
+                "type": "string"
               }
             },
             "required": [
-              "user_id"
+              "path"
             ],
             "type": "object"
           }
@@ -97,9 +97,9 @@ async fn main() {
     let example_function_call_input_raw = r#"{
         "type": "function",
         "function": {
-            "name": "get_user_info",
+            "name": "read_file",
             "arguments": {
-                "user_id": 1
+                "path": "test.txt"
             }
         }
     }"#;
@@ -113,9 +113,10 @@ async fn main() {
         serde_json::to_string_pretty(&example_call).unwrap()
     );
 
-    // You can then call the tool like this, handling the error:
+    // Rename call_tool_async to call_tool (await is already present)
     match tool_handler.call_tool(&example_call).await {
         Ok(result) => println!("Result: {}", result),
+        // Print ToolError
         Err(err) => println!("Error calling tool: {}", err),
     }
 
@@ -125,36 +126,22 @@ async fn main() {
     Input: {
       "type": "function",
       "function": {
-        "name": "get_user_info",
+        "name": "read_file",
         "arguments": {
-          "user_id": 1
+          "path": "test.txt"
         }
       }
     }
-    Result: User 1 info: Name: John Doe, Email: john.doe@example.com
+    Result: File content: test.txt
     */
 
-    // You can also call with arguments directly
+    // Rename call_with_args_async to call_with_args (await is already present)
     match tool_handler
-        .call_with_args("get_user_info", &["1".to_string()])
+        .call_with_args("read_file", &["another_file.txt".to_string()])
         .await
     {
         Ok(result) => println!("\nDirect call result: {}", result),
+        // Print ToolError
         Err(err) => println!("\nDirect call error: {}", err),
     }
-
-    /*
-    Println output:
-    === Direct Call Example ===
-    Input: {
-      "type": "function",
-      "function": {
-        "name": "get_user_info",
-        "arguments": {
-          "user_id": 1
-        }
-      }
-    }
-    Result: User 1 info: Name: John Doe, Email: john.doe@example.com
-    */
 }
