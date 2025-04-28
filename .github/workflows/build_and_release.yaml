@@ -72,7 +72,7 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
         run: |
           cd tool_calling_macros
-          cargo publish --locked
+          cargo publish
           cd .. # Go back to the root directory
 
       - name: Extract derive crate version
@@ -85,7 +85,7 @@ jobs:
       - name: Publish tool_calling crate
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-        run: cargo publish --locked
+        run: cargo publish
 
   create_github_release:
     name: Create Github Release
