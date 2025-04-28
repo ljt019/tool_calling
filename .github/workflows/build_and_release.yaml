@@ -89,7 +89,7 @@ jobs:
 
   create_github_release:
     name: Create Github Release
-    needs: build
+    needs: publish_to_crates_io
     runs-on: ubuntu-latest
     permissions:
       contents: write
