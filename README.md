@@ -29,6 +29,7 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 ```
 
 Or use cargo:
+
 ```shell
 cargo add tool_calling
 cargo add tokio --features macros,rt-multi-thread
@@ -175,6 +176,7 @@ Explore the examples directory for more usage scenarios:
 ## Testing
 
 Run the full test suite:
+
 ```bash
 cargo test
 ```
@@ -197,6 +199,7 @@ cargo test
 ### Error Handling
 
 `ToolError` variants:
+
 - `NotFound(String)` — Tool name not registered.
 - `BadArgs(String)` — Arguments missing or failed JSON Schema validation.
 - `Execution(String)` — Underlying function panicked or returned an execution error.
