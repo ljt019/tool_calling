@@ -25,7 +25,7 @@ use std::sync::Arc;
 /// }
 /// ```
 /// (Defaults must be handled manually via `Option::unwrap_or`/`unwrap_or_else`.)
-pub use tool_calling_derive::default;
+pub use tool_calling_macros::default;
 /// Attribute macro to mark a function as a tool.
 ///
 /// Use `#[tool]` on free functions to register them as tools with automatic JSON Schema validation.
@@ -40,7 +40,7 @@ pub use tool_calling_derive::default;
 ///     (a + b).to_string()
 /// }
 /// ```
-pub use tool_calling_derive::tool;
+pub use tool_calling_macros::tool;
 
 /// Errors returned by tool operations.
 ///

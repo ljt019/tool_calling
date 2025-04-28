@@ -1,5 +1,5 @@
 [package]
-name = "tool_calling_derive"
+name = "tool_calling_macros"
 version = "0.1.0"
 edition = "2021"
 description = "Procedural macros for tool_calling crate"
