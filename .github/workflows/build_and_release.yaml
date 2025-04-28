@@ -80,7 +80,7 @@ jobs:
         run: echo "::set-output name=version::$(grep '^version =' tool_calling_derive/Cargo.toml | cut -d '"' -f 2)"
 
       - name: Update Cargo.toml for main crate dependency
-        run: sed -i "s|tool_calling_derive = {.*path.*}|tool_calling_derive = \\"${{ steps.get_derive_version.outputs.version }}\\"|" Cargo.toml
+        run: sed -i 's|tool_calling_derive = {.*path.*}|tool_calling_derive = "${{ steps.get_derive_version.outputs.version }}"|' Cargo.toml
 
       - name: Publish tool_calling crate
         env:
