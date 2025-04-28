@@ -1343,11 +1343,11 @@ dependencies = [
  "syn",
  "thiserror",
  "tokio",
- "tool_calling_derive",
+ "tool_calling_macros",
 ]
 
 [[package]]
-name = "tool_calling_derive"
+name = "tool_calling_macros"
 version = "0.1.0"
 dependencies = [
  "futures",
