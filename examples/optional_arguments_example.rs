@@ -134,7 +134,7 @@ async fn main() {
     println!("\n=== Example 3: Direct Call ===");
 
     let res_direct = handler
-        .call_with_args("greet", &["Charlie".to_string(), "...".to_string()])
+        .call_with_args("greet", &["Charlie".to_string(), "....".to_string()])
         .await
         .unwrap();
     println!("Direct call result: {}", res_direct);
@@ -142,6 +142,6 @@ async fn main() {
     /*
     Println output:
     === Example 3: Direct Call ===
-    Direct call result: Hello, Charlie...
+    Direct call result: Hello, Charlie....
     */
 }
