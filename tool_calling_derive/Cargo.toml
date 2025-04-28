@@ -2,6 +2,8 @@
 name = "tool_calling_derive"
 version = "0.1.0"
 edition = "2021"
+description = "Procedural macros for tool_calling crate"
+license = "MIT OR Apache-2.0"
 
 [lib]
 proc-macro = true
